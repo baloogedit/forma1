@@ -1,3 +1,5 @@
+import { teamSwatch } from './teams.js';
+
 // Escape text from the API before putting it into innerHTML.
 export function esc(value) {
   return String(value ?? '')
@@ -92,7 +94,7 @@ export function driverLink(driver) {
 }
 
 export function teamLink(constructor) {
-  return `<a class="inline-link" href="#/team/${esc(constructor.constructorId)}">${esc(constructor.name)}</a>`;
+  return `${teamSwatch(constructor.constructorId)}<a class="inline-link" href="#/team/${esc(constructor.constructorId)}">${esc(constructor.name)}</a>`;
 }
 
 // Splits the schedule into finished races and the next one.

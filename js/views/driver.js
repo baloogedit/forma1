@@ -1,5 +1,5 @@
 import { getDriverProfile, getDriverStandings, getChampions } from '../api.js';
-import { esc, driverName, shortDate, pageHead } from '../utils.js';
+import { esc, driverName, teamLink, shortDate, pageHead } from '../utils.js';
 
 export const nav = 'standings';
 export const title = ({ driver }) => (driver ? driverName(driver) : 'Driver not found');
@@ -31,7 +31,7 @@ export function render(root, { driver, career, races, titles, standing }) {
     ${pageHead(facts.join(' · '), driverName(driver))}
     <p class="page-sub">
       ${driver.dateOfBirth ? `Born ${esc(formatBirth(driver.dateOfBirth))} · ` : ''}
-      ${team ? `Drives for <a class="inline-link" href="#/team/${esc(team.constructorId)}">${esc(team.name)}</a> · ` : ''}
+      ${team ? `Drives for ${teamLink(team)} · ` : ''}
       <a class="inline-link" href="${esc(driver.url)}" target="_blank" rel="noopener">Wikipedia ↗</a>
     </p>
 

@@ -1,6 +1,7 @@
 import { getDriverStandings, getConstructorStandings } from '../api.js';
 import { esc, driverName, bar, pageHead } from '../utils.js';
 import { setupTabs } from '../tabs.js';
+import { teamSwatch } from '../teams.js';
 
 export const title = 'Standings';
 
@@ -36,18 +37,18 @@ export function render(root, data, [tab = 'drivers']) {
 
 function driverRow(d) {
   const team = d.Constructors.at(-1)?.name ?? '';
-  return { pos: d.position ?? d.positionText, name: driverName(d.Driver), href: `#/driver/${d.Driver.driverId}`, sub: `${team} · ${d.wins} wins`, points: d.points };
+  return { pos: d.position ?? d.positionText, teamId: d.Constructors.at(-1)?.constructorId, name: driverName(d.Driver), href: `#/driver/${d.Driver.driverId}`, sub: `${team} · ${d.wins} wins`, points: d.points };
 }
 
 function teamRow(c) {
-  return { pos: c.position ?? c.positionText, name: c.Constructor.name, href: `#/team/${c.Constructor.constructorId}`, sub: `${c.Constructor.nationality} · ${c.wins} wins`, points: c.points };
+  return { pos: c.position ?? c.positionText, teamId: c.Constructor.constructorId, name: c.Constructor.name, href: `#/team/${c.Constructor.constructorId}`, sub: `${c.Constructor.nationality} · ${c.wins} wins`, points: c.points };
 }
 
 function rowHtml(row, index, max) {
   return `
     <li class="${index === 0 ? 'leader' : ''}">
       <span class="pos">${esc(row.pos)}</span>
-      <div><strong><a class="inline-link" href="${esc(row.href)}">${esc(row.name)}</a></strong><small>${esc(row.sub)}</small></div>
+      <div><strong>${teamSwatch(row.teamId)}<a class="inline-link" href="${esc(row.href)}">${esc(row.name)}</a></strong><small>${esc(row.sub)}</small></div>
       ${bar((Number(row.points) / max) * 100)}
       <span class="pts">${esc(row.points)}</span>
     </li>`;

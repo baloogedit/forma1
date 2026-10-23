@@ -3,6 +3,7 @@ import {
   esc, raceStart, location, driverLink, teamLink, seasonStatus, countdownParts, pad, bar, pageHead,
   weekendSessions, sessionState, isSprintWeekend, dayLabel, timeLabel,
 } from '../utils.js';
+import { teamSwatch } from '../teams.js';
 
 export const title = 'Pit Wall';
 export const skeleton = 'dashboard';
@@ -117,7 +118,7 @@ function driversTop5(drivers) {
       ${drivers.slice(0, 5).map((d) => `
         <li>
           <span class="pos">${esc(d.position ?? d.positionText)}</span>
-          <span>${driverLink(d.Driver)}</span>
+          <span>${teamSwatch(d.Constructors.at(-1)?.constructorId)}${driverLink(d.Driver)}</span>
           ${bar((Number(d.points) / max) * 100)}
           <span class="pts">${esc(d.points)}</span>
         </li>`).join('')}
