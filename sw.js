@@ -4,7 +4,7 @@
 // Strategy: stale-while-revalidate. A file is answered from the cache at once
 // and refreshed from the network in the background, so an update shows up on
 // the next visit. Bump CACHE when the list of files changes.
-const CACHE = 'pitlane-v1';
+const CACHE = 'pitlane-v2';
 
 const APP_FILES = [
   './',
@@ -36,8 +36,7 @@ const APP_FILES = [
   'fonts/barlow-600-latin.woff2',
   'fonts/barlow-700-latin.woff2',
   'fonts/bebas-neue-400-latin.woff2',
-  'icons/icon-32.png',
-  'icons/icon-192.png',
+  'icons/icon.svg',
 ];
 
 self.addEventListener('install', (event) => {

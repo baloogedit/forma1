@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- "P/L" drawn as shapes (icons can't use web fonts); kept inside the
+       central 60% so the icon also works as a maskable icon -->
+  <rect width="512" height="512" fill="#0E0301"/>
+  <g transform="translate(4 0)">
+    <path fill="#FFE9EA" fill-rule="evenodd"
+          d="M140 176H186A26 26 0 0 1 212 202V240A26 26 0 0 1 186 266H162V336H140Z
+             M162 196H182A8 8 0 0 1 190 204V238A8 8 0 0 1 182 246H162Z"/>
+    <path fill="#E81E25" d="M222 336L254 176H276L244 336Z"/>
+    <path fill="#FFE9EA" d="M296 176H318V316H364V336H296Z"/>
+  </g>
+</svg>
