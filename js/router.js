@@ -1,4 +1,5 @@
-// Minimal hash router. Each view module exports:
+// Minimal hash router. Routes map a name to a function that imports the view
+// module (lazy loading). Each view module exports:
 //   load(params)              -> Promise of data
 //   render(root, data, params) -> optional cleanup function
 //   title                     -> page title, or a function (data, params) => title
@@ -84,14 +85,22 @@ function parseHash() {
 // position). rerender: false only re-reads the data to update its age.
 async function handle({ silent = false, rerender = true } = {}) {
   const { name, params } = parseHash();
-  const view = routes[name];
-  if (!view) {
+  const importView = routes[name];
+  if (!importView) {
     location.hash = '#/';
     return;
   }
 
   const token = ++renderToken;
   const el = root();
+  let view;
+  try {
+    view = await importView(); // the browser caches modules, so this is instant after the first visit
+  } catch (err) {
+    if (!silent && token === renderToken) showError(el, err);
+    return;
+  }
+  if (token !== renderToken) return;
   let restoreY = null;
   if (!silent) {
     restoreY = enterHistoryEntry();
@@ -120,16 +129,20 @@ async function handle({ silent = false, rerender = true } = {}) {
     setDataTime(getDataAge());
   } catch (err) {
     if (silent || token !== renderToken) return; // keep showing what we have
-    console.error(err);
-    el.innerHTML = `
-      <div class="card error-card">
-        <p class="eyebrow">Box, box</p>
-        <h2 class="card-title">Couldn't load data</h2>
-        <p>The F1 data service didn't respond. Check your connection and try again.</p>
-        <button class="btn" id="retry">Retry</button>
-      </div>`;
-    el.querySelector('#retry').addEventListener('click', () => handle());
+    showError(el, err);
   }
+}
+
+function showError(el, err) {
+  console.error(err);
+  el.innerHTML = `
+    <div class="card error-card">
+      <p class="eyebrow">Box, box</p>
+      <h2 class="card-title">Couldn't load data</h2>
+      <p>The F1 data service didn't respond. Check your connection and try again.</p>
+      <button class="btn" id="retry">Retry</button>
+    </div>`;
+  el.querySelector('#retry').addEventListener('click', () => handle());
 }
 
 function updateNav(name) {
