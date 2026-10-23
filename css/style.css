@@ -140,7 +140,10 @@ main { flex: 1; padding-bottom: 56px; }
 
 .nav { display: flex; gap: 4px; margin-left: auto; }
 .nav a {
-  padding: 8px 14px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 14px;
   border-radius: 8px;
   text-transform: uppercase;
   font-weight: 600;
@@ -154,8 +157,8 @@ main { flex: 1; padding-bottom: 56px; }
 
 .theme-toggle {
   flex-shrink: 0;
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   border-radius: 8px;
   border: 1px solid var(--border);
   background: var(--surface);
@@ -500,7 +503,8 @@ table.results {
   font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  padding: 8px 18px;
+  min-height: 44px;
+  padding: 0 18px;
   border-radius: 7px;
   cursor: pointer;
 }
@@ -656,7 +660,7 @@ table.results {
 .badge-inline.upcoming { background: var(--surface-2); color: var(--muted); }
 .badge-inline.next { background: var(--accent); color: var(--on-accent); }
 .badge-inline.live { background: var(--accent); color: var(--on-accent); animation: pulse 1.6s ease-in-out infinite; }
-.badge-inline.result { background: var(--accent); color: var(--on-accent); cursor: pointer; }
+.badge-inline.result { background: var(--accent); color: var(--on-accent); cursor: pointer; min-height: 32px; }
 .badge-inline.result:hover { opacity: 0.85; }
 @keyframes pulse { 50% { opacity: 0.55; } }
 
@@ -749,8 +753,8 @@ table.results {
   .dash-grid, .records-grid { grid-template-columns: 1fr; }
   .header-inner { flex-wrap: wrap; gap: 10px; }
   .theme-toggle { margin-left: auto; }
-  .nav { order: 3; width: 100%; margin-left: 0; overflow-x: auto; scrollbar-width: none; }
-  .nav a { padding: 7px 12px; font-size: 0.82rem; }
+  .nav { order: 3; width: 100%; margin-left: 0; display: grid; grid-template-columns: repeat(5, 1fr); }
+  .nav a { justify-content: center; padding: 0 6px; font-size: 0.82rem; }
   .page-head { padding: 32px 0 22px; }
   .standings li { grid-template-columns: 36px 1fr 60px; padding: 12px 16px; }
   .standings .bar { display: none; }
@@ -759,6 +763,28 @@ table.results {
 }
 
 @media (max-width: 600px) {
+  /* the header keeps logo + theme toggle; the nav becomes a bottom tab bar */
+  .nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 20;
+    gap: 0;
+    padding-bottom: env(safe-area-inset-bottom);
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+  }
+  .nav a {
+    min-height: 56px;
+    border-radius: 0;
+    font-size: 0.7rem;
+    letter-spacing: 0.02em;
+    padding: 0 2px;
+  }
+  .nav a.active { background: var(--surface-2); color: var(--accent-text); box-shadow: inset 0 3px 0 var(--accent); }
+  body { padding-bottom: calc(56px + env(safe-area-inset-bottom)); }
+
   .cal-grid, .stat-grid { grid-template-columns: 1fr; }
   .card, .hero { padding: 20px; }
   .countdown { gap: 6px; }
