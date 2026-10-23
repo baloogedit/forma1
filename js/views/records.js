@@ -41,7 +41,7 @@ export function render(root, { drivers, constructors }) {
       </section>
     </div>
 
-    <section class="card" style="margin-top:32px">
+    <section class="card section-gap">
       <h2 class="card-title">World Champions</h2>
       <div class="champ-table">${championsTable(drivers, constructors)}</div>
     </section>`;

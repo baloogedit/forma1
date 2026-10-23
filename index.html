@@ -8,6 +8,13 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <script>
+    // apply a saved theme before the first paint to avoid a flash
+    try {
+      const theme = localStorage.getItem('pitlane:theme');
+      if (theme) document.documentElement.dataset.theme = theme;
+    } catch {}
+  </script>
 </head>
 <body>
   <header class="site-header">
@@ -20,8 +27,8 @@
         <a href="#/standings" data-route="standings">Standings</a>
         <a href="#/records" data-route="records">Records</a>
       </nav>
+      <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle light/dark mode"></button>
     </div>
-    <div class="header-rule"></div>
   </header>
 
   <main id="app" class="container"></main>
