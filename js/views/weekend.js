@@ -1,7 +1,7 @@
 import { getSchedule } from '../api.js';
 import {
   esc, location, isSprintWeekend, weekendSessions, sessionState,
-  dayLabel, timeLabel, timeZone, timeUntil, pageHead,
+  dayLabel, timeLabel, timeZone, timeUntil, pageHead, prefersReducedMotion,
 } from '../utils.js';
 import { mountSessionResults } from '../sessions.js';
 
@@ -70,7 +70,7 @@ export function render(root, race) {
     const button = event.target.closest('[data-results]');
     if (!button || !tabs) return;
     tabs.show(button.dataset.results);
-    resultsBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    resultsBox.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'center' });
   });
 
   update();

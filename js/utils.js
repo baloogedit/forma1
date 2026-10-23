@@ -118,3 +118,6 @@ export function pageHead(eyebrow, title) {
       <h1 class="page-title">${esc(title)}</h1>
     </header>`;
 }
+
+// JS-driven smooth scrolling isn't covered by the CSS media query, so check it here.
+export const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;

@@ -13,7 +13,7 @@
   --border: rgba(14, 3, 1, 0.1);
   --text: var(--blackberry);
   --muted: rgba(14, 3, 1, 0.7);
-  --dim: rgba(14, 3, 1, 0.5);
+  --dim: rgba(14, 3, 1, 0.62);    /* >= 5.6:1 on every light surface */
   --accent: var(--red-rose);
   --on-accent: #FFFFFF;
   --accent-text: #C8161C;          /* accent for text: coral is too light on white */
@@ -34,7 +34,7 @@
     --border: rgba(255, 194, 195, 0.1);
     --text: #FFE9EA;
     --muted: rgba(255, 214, 215, 0.8);
-    --dim: rgba(255, 214, 215, 0.55);
+    --dim: rgba(255, 214, 215, 0.62);
     --accent-text: var(--coral);
     color-scheme: dark;
   }
@@ -47,7 +47,7 @@
   --border: rgba(255, 194, 195, 0.1);
   --text: #FFE9EA;
   --muted: rgba(255, 214, 215, 0.8);
-  --dim: rgba(255, 214, 215, 0.55);
+  --dim: rgba(255, 214, 215, 0.62);
   --accent-text: var(--coral);
   color-scheme: dark;
 }
@@ -695,7 +695,11 @@ table.results {
 .site-footer a { color: var(--accent-text); }
 
 @media (prefers-reduced-motion: reduce) {
-  * { animation: none !important; transition: none !important; }
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* ===== Responsive ===== */
