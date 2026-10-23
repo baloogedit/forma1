@@ -55,9 +55,13 @@ export function render(root, { schedule, drivers, constructors }) {
 
   const target = raceStart(next);
   const tiles = root.querySelectorAll('[data-unit]');
+  const spoken = root.querySelector('#countdown-text');
   const tick = () => {
     const parts = countdownParts(target);
     tiles.forEach((tile) => { tile.textContent = pad(parts[tile.dataset.unit]); });
+    // the screen-reader text only changes once a minute, not every second
+    const text = countdownText(parts);
+    if (spoken.textContent !== text) spoken.textContent = text;
   };
   tick();
   const timer = setInterval(tick, 1000);
@@ -73,7 +77,8 @@ function heroCard(race) {
       <p class="eyebrow">Next up · Round ${esc(race.round)}${isSprintWeekend(race) ? ' · Sprint weekend' : ''}</p>
       <h2>${esc(race.raceName)}</h2>
       <p class="circuit">${esc(race.Circuit.circuitName)} — ${esc(location(race))}</p>
-      <div class="countdown">
+      <p class="sr-only" id="countdown-text"></p>
+      <div class="countdown" aria-hidden="true">
         ${units.map(([key, label]) => `
           <div><strong data-unit="${key}">00</strong><small>${label.toUpperCase()}</small></div>`).join('')}
       </div>
@@ -82,6 +87,16 @@ function heroCard(race) {
         <a href="#/weekend/${esc(race.round)}">Weekend schedule →</a>
       </div>
     </section>`;
+}
+
+// "Starts in 2 days, 12 hours and 18 minutes"
+function countdownText({ days, hrs, min }) {
+  const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
+  const parts = [];
+  if (days) parts.push(plural(days, 'day'));
+  if (days || hrs) parts.push(plural(hrs, 'hour'));
+  parts.push(plural(min, 'minute'));
+  return `Starts in ${parts.slice(0, -1).join(', ')}${parts.length > 1 ? ' and ' : ''}${parts.at(-1)}`;
 }
 
 function seasonOverCard(season) {
