@@ -2,6 +2,7 @@ import { getSchedule } from '../api.js';
 import { esc, shortDate, location, seasonStatus, isSprintWeekend, pageHead } from '../utils.js';
 
 export const title = 'Calendar';
+export const skeleton = 'cards';
 
 export async function load() {
   return getSchedule();

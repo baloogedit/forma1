@@ -3,6 +3,9 @@
 //   render(root, data, params) -> optional cleanup function
 //   title                     -> page title, or a function (data, params) => title
 //   nav (optional)            -> which header link to highlight
+//   skeleton (optional)       -> placeholder shape while loading: 'dashboard' | 'cards' | 'list'
+import { skeleton } from './skeleton.js';
+
 const root = () => document.getElementById('app');
 
 let routes = {};
@@ -38,7 +41,7 @@ async function handle() {
 
   const token = ++renderToken;
   const el = root();
-  el.innerHTML = '<div class="loading"><div class="spinner"></div>Loading</div>';
+  el.innerHTML = skeleton(view.skeleton);
   window.scrollTo(0, 0);
 
   try {

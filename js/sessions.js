@@ -3,6 +3,7 @@
 import { getSessionResults } from './api.js';
 import { esc, driverName, weekendSessions, sessionState } from './utils.js';
 import { setupTabs } from './tabs.js';
+import { tableSkeleton } from './skeleton.js';
 
 const LABELS = { sprint: 'Sprint', qualifying: 'Qualifying', race: 'Race' };
 const CAPTIONS = { sprint: 'sprint classification', qualifying: 'qualifying results', race: 'race classification' };
@@ -32,7 +33,7 @@ export function mountSessionResults(container, race, { preloaded = {}, initial }
   async function show(type) {
     current = type;
     if (!cache[type]) {
-      body.innerHTML = '<div class="loading small"><div class="spinner"></div>Loading</div>';
+      body.innerHTML = tableSkeleton();
       try {
         cache[type] = await getSessionResults(race.season, race.round, type);
       } catch {

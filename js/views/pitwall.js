@@ -5,6 +5,7 @@ import {
 } from '../utils.js';
 
 export const title = 'Pit Wall';
+export const skeleton = 'dashboard';
 
 export async function load() {
   const [schedule, drivers, constructors] = await Promise.all([
