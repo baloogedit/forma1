@@ -2,8 +2,6 @@ import { getDriverStandings, getConstructorStandings } from '../api.js';
 import { esc, driverName, bar, pageHead } from '../utils.js';
 import { setupTabs } from '../tabs.js';
 
-let activeTab = 'drivers'; // remembered while the app is open
-
 export const title = 'Standings';
 
 export async function load() {
@@ -11,7 +9,8 @@ export async function load() {
   return { drivers, constructors };
 }
 
-export function render(root, data) {
+// The tab lives in the URL (#/standings/constructors) so it can be shared and survives a reload.
+export function render(root, data, [tab = 'drivers']) {
   root.innerHTML = `
     ${pageHead('World championship', 'Standings')}
     <div class="toggle-group" role="tablist" aria-label="Championship">
@@ -23,16 +22,16 @@ export function render(root, data) {
   const list = root.querySelector('#standings-list');
   const panel = root.querySelector('#standings-panel');
 
-  const show = (tab) => {
-    activeTab = tab;
-    const rows = tab === 'drivers' ? data.drivers.map(driverRow) : data.constructors.map(teamRow);
-    const max = Number((tab === 'drivers' ? data.drivers : data.constructors)[0]?.points) || 1;
+  const show = (selected) => {
+    history.replaceState(history.state, '', selected === 'drivers' ? '#/standings' : `#/standings/${selected}`);
+    const rows = selected === 'drivers' ? data.drivers.map(driverRow) : data.constructors.map(teamRow);
+    const max = Number((selected === 'drivers' ? data.drivers : data.constructors)[0]?.points) || 1;
     list.innerHTML = rows.length
       ? rows.map((row, i) => rowHtml(row, i, max)).join('')
       : '<li><span></span><p class="empty">No standings yet this season.</p></li>';
   };
 
-  setupTabs(root.querySelector('[role="tablist"]'), panel, show).select(activeTab);
+  setupTabs(root.querySelector('[role="tablist"]'), panel, show).select(tab === 'constructors' ? tab : 'drivers');
 }
 
 function driverRow(d) {
