@@ -687,6 +687,22 @@ table.results {
   cursor: pointer;
 }
 .btn:hover { opacity: 0.85; }
+.btn-outline {
+  background: none;
+  color: var(--accent-text);
+  border: 1px solid currentColor;
+  font-size: 0.85rem;
+  padding: 8px 16px;
+}
+.btn-outline:hover { opacity: 1; background: var(--surface-2); }
+
+.card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
 
 .empty { color: var(--muted); padding: 20px 0; }
 

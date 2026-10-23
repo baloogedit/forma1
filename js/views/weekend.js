@@ -4,6 +4,7 @@ import {
   dayLabel, timeLabel, timeZone, timeUntil, pageHead, prefersReducedMotion,
 } from '../utils.js';
 import { mountSessionResults } from '../sessions.js';
+import { downloadWeekendIcs } from '../ics.js';
 
 export const nav = 'calendar'; // highlight Calendar in the header
 export const title = (race) => race?.raceName ?? 'Race weekend';
@@ -35,7 +36,10 @@ export function render(root, race) {
 
     <div class="weekend-grid">
       <section class="card">
-        <h2 class="card-title">Weekend Schedule</h2>
+        <div class="card-head">
+          <h2 class="card-title">Weekend Schedule</h2>
+          <button class="btn btn-outline" id="add-to-calendar" type="button">Add to calendar</button>
+        </div>
         <p class="tz-note">Times shown in your local time (${esc(timeZone())})</p>
         <ul class="schedule" id="schedule"></ul>
       </section>
@@ -49,6 +53,7 @@ export function render(root, race) {
 
   const list = root.querySelector('#schedule');
   const resultsBox = root.querySelector('#weekend-results');
+  root.querySelector('#add-to-calendar').addEventListener('click', () => downloadWeekendIcs(race));
   let tabs = null;
   let finishedCount = -1;
 
