@@ -1,0 +1,14 @@
+{
+  "name": "PIT/LANE – Formula 1",
+  "short_name": "PIT/LANE",
+  "description": "F1 calendar, race weekends, results, standings and records.",
+  "start_url": "./#/",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0E0301",
+  "theme_color": "#0E0301",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

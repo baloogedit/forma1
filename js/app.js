@@ -35,3 +35,10 @@ toggle.addEventListener('click', () => {
 });
 systemDark.addEventListener('change', updateToggle);
 updateToggle();
+
+// Offline support and "install app": the service worker caches the app's own files (see sw.js).
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch((err) => console.warn('Service worker not registered', err));
+  });
+}
