@@ -21,24 +21,58 @@ function cacheWrite(key, data) {
   }
 }
 
-// Fetch one endpoint and return its MRData. Falls back to stale cache when offline.
+// Time of the oldest data the current page was built from (for "Updated 12 min ago").
+// The router resets it before loading a page and reads it after rendering.
+let oldest = null;
+export function resetDataAge() { oldest = null; }
+export const getDataAge = () => oldest;
+const noteAge = (time) => { oldest = Math.min(oldest ?? time, time); };
+
+async function fetchData(url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`API error ${res.status}`);
+  return (await res.json()).MRData;
+}
+
+// Stale-while-revalidate: saved data is returned at once, even when older than
+// `ttl`. Stale data is then refreshed in the background, and the outcome is
+// broadcast as a window event:
+//   pitlane:refreshed      { detail: { changed } } – the page may want to re-render
+//   pitlane:refresh-failed                        – offline or the API is down
+const refreshing = new Set();
+
+function revalidate(key, url, cached) {
+  if (refreshing.has(key)) return;
+  refreshing.add(key);
+  fetchData(url)
+    .then((data) => {
+      if (data.total === '0') return;
+      cacheWrite(key, data);
+      const changed = JSON.stringify(data) !== JSON.stringify(cached.data);
+      window.dispatchEvent(new CustomEvent('pitlane:refreshed', { detail: { changed } }));
+    })
+    .catch(() => window.dispatchEvent(new CustomEvent('pitlane:refresh-failed')))
+    .finally(() => refreshing.delete(key));
+}
+
+// Fetch one endpoint and return its MRData.
 async function get(path, params = {}, ttl = HOUR) {
   const query = new URLSearchParams(params).toString();
   const key = path + (query ? '?' + query : '');
+  const url = `${BASE}${path}.json${query ? '?' + query : ''}`;
   const cached = cacheRead(key);
-  if (cached && Date.now() - cached.time < ttl) return cached.data;
 
-  try {
-    const res = await fetch(`${BASE}${path}.json${query ? '?' + query : ''}`);
-    if (!res.ok) throw new Error(`API error ${res.status}`);
-    const json = await res.json();
-    // don't cache empty answers – results often appear a while after a session ends
-    if (json.MRData.total !== '0') cacheWrite(key, json.MRData);
-    return json.MRData;
-  } catch (err) {
-    if (cached) return cached.data;
-    throw err;
+  if (cached) {
+    noteAge(cached.time);
+    if (Date.now() - cached.time >= ttl) revalidate(key, url, cached);
+    return cached.data;
   }
+
+  const data = await fetchData(url); // nothing saved: this has to succeed
+  // don't cache empty answers – results often appear a while after a session ends
+  if (data.total !== '0') cacheWrite(key, data);
+  noteAge(Date.now());
+  return data;
 }
 
 export async function getSchedule() {

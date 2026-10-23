@@ -5,6 +5,8 @@
 //   nav (optional)            -> which header link to highlight
 //   skeleton (optional)       -> placeholder shape while loading: 'dashboard' | 'cards' | 'list'
 import { skeleton } from './skeleton.js';
+import { resetDataAge, getDataAge } from './api.js';
+import { setDataTime } from './status.js';
 
 const root = () => document.getElementById('app');
 
@@ -17,8 +19,25 @@ let firstRender = true;
 export function startRouter(routeTable, defaultRoute) {
   routes = routeTable;
   fallback = defaultRoute;
-  window.addEventListener('hashchange', handle);
+  window.addEventListener('hashchange', () => handle());
+  listenForRefreshes();
   handle();
+}
+
+// Pages render from saved data first; when a background refresh brings in new
+// data, re-render the current page in place. Refreshes arrive in bursts (one
+// per endpoint), so wait for them to settle.
+function listenForRefreshes() {
+  let timer = null;
+  let changed = false;
+  window.addEventListener('pitlane:refreshed', (event) => {
+    changed ||= event.detail.changed;
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      handle({ silent: true, rerender: changed });
+      changed = false;
+    }, 400);
+  });
 }
 
 // "#/results/12" -> { name: "results", params: ["12"] }
@@ -27,7 +46,9 @@ function parseHash() {
   return { name: parts[0] ?? fallback, params: parts.slice(1) };
 }
 
-async function handle() {
+// silent: refresh the current page in place (no skeleton, keep scroll and focus
+// position). rerender: false only re-reads the data to update its age.
+async function handle({ silent = false, rerender = true } = {}) {
   const { name, params } = parseHash();
   const view = routes[name];
   if (!view) {
@@ -35,23 +56,31 @@ async function handle() {
     return;
   }
 
-  if (cleanup) cleanup();
-  cleanup = null;
-  updateNav(view.nav ?? name); // sub-pages can highlight their parent section
-
   const token = ++renderToken;
   const el = root();
-  el.innerHTML = skeleton(view.skeleton);
-  window.scrollTo(0, 0);
+  if (!silent) {
+    if (cleanup) cleanup();
+    cleanup = null;
+    updateNav(view.nav ?? name); // sub-pages can highlight their parent section
+    el.innerHTML = skeleton(view.skeleton);
+    window.scrollTo(0, 0);
+  }
 
+  resetDataAge();
   try {
     const data = await view.load(params);
     if (token !== renderToken) return; // the user navigated away meanwhile
-    cleanup = view.render(el, data, params) ?? null;
-    setTitle(typeof view.title === 'function' ? view.title(data, params) : view.title);
-    announcePage(el);
+    if (rerender) {
+      const scrollY = window.scrollY;
+      if (cleanup) cleanup();
+      cleanup = view.render(el, data, params) ?? null;
+      setTitle(typeof view.title === 'function' ? view.title(data, params) : view.title);
+      if (silent) window.scrollTo(0, scrollY);
+      else announcePage(el);
+    }
+    setDataTime(getDataAge());
   } catch (err) {
-    if (token !== renderToken) return;
+    if (silent || token !== renderToken) return; // keep showing what we have
     console.error(err);
     el.innerHTML = `
       <div class="card error-card">
@@ -60,7 +89,7 @@ async function handle() {
         <p>The F1 data service didn't respond. Check your connection and try again.</p>
         <button class="btn" id="retry">Retry</button>
       </div>`;
-    el.querySelector('#retry').addEventListener('click', handle);
+    el.querySelector('#retry').addEventListener('click', () => handle());
   }
 }
 
