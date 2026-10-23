@@ -2,6 +2,7 @@
 // weekend page and the Results accordion. Each session is fetched on first view.
 import { getSessionResults } from './api.js';
 import { esc, driverName, weekendSessions, sessionState } from './utils.js';
+import { setupTabs } from './tabs.js';
 
 const LABELS = { sprint: 'Sprint', qualifying: 'Qualifying', race: 'Race' };
 
@@ -19,23 +20,16 @@ export function mountSessionResults(container, race, { preloaded = {}, initial }
 
   const cache = { ...preloaded };
   container.innerHTML = `
-    <div class="toggle-group small" role="tablist">
-      ${types.map((t) => `<button data-type="${t}" role="tab">${LABELS[t]}</button>`).join('')}
+    <div class="toggle-group small" role="tablist" aria-label="Session">
+      ${types.map((t) => `<button data-value="${t}" role="tab">${LABELS[t]}</button>`).join('')}
     </div>
     <div class="session-body"></div>`;
 
   const body = container.querySelector('.session-body');
-  const buttons = container.querySelectorAll('[data-type]');
   let current = null;
 
   async function show(type) {
-    if (!types.includes(type)) return;
     current = type;
-    buttons.forEach((b) => {
-      b.classList.toggle('active', b.dataset.type === type);
-      b.setAttribute('aria-selected', b.dataset.type === type);
-    });
-
     if (!cache[type]) {
       body.innerHTML = '<div class="loading small"><div class="spinner"></div>Loading</div>';
       try {
@@ -56,9 +50,9 @@ export function mountSessionResults(container, race, { preloaded = {}, initial }
     }
   }
 
-  buttons.forEach((b) => b.addEventListener('click', () => show(b.dataset.type)));
-  show(types.includes(initial) ? initial : types.at(-1)); // default: the latest session
-  return { show };
+  const tabs = setupTabs(container.querySelector('[role="tablist"]'), body, show);
+  tabs.select(types.includes(initial) ? initial : types.at(-1)); // default: the latest session
+  return { show: tabs.select };
 }
 
 function podium(top3) {

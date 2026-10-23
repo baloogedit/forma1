@@ -1,5 +1,6 @@
 import { getDriverStandings, getConstructorStandings } from '../api.js';
 import { esc, driverName, bar, pageHead } from '../utils.js';
+import { setupTabs } from '../tabs.js';
 
 let activeTab = 'drivers'; // remembered while the app is open
 
@@ -13,21 +14,17 @@ export async function load() {
 export function render(root, data) {
   root.innerHTML = `
     ${pageHead('World championship', 'Standings')}
-    <div class="toggle-group" role="tablist">
-      <button data-tab="drivers" role="tab">Drivers</button>
-      <button data-tab="constructors" role="tab">Constructors</button>
+    <div class="toggle-group" role="tablist" aria-label="Championship">
+      <button data-value="drivers" role="tab">Drivers</button>
+      <button data-value="constructors" role="tab">Constructors</button>
     </div>
-    <ul class="standings" id="standings-list"></ul>`;
+    <div id="standings-panel"><ul class="standings" id="standings-list"></ul></div>`;
 
   const list = root.querySelector('#standings-list');
-  const buttons = root.querySelectorAll('[data-tab]');
+  const panel = root.querySelector('#standings-panel');
 
   const show = (tab) => {
     activeTab = tab;
-    buttons.forEach((b) => {
-      b.classList.toggle('active', b.dataset.tab === tab);
-      b.setAttribute('aria-selected', b.dataset.tab === tab);
-    });
     const rows = tab === 'drivers' ? data.drivers.map(driverRow) : data.constructors.map(teamRow);
     const max = Number((tab === 'drivers' ? data.drivers : data.constructors)[0]?.points) || 1;
     list.innerHTML = rows.length
@@ -35,8 +32,7 @@ export function render(root, data) {
       : '<li><span></span><p class="empty">No standings yet this season.</p></li>';
   };
 
-  buttons.forEach((b) => b.addEventListener('click', () => show(b.dataset.tab)));
-  show(activeTab);
+  setupTabs(root.querySelector('[role="tablist"]'), panel, show).select(activeTab);
 }
 
 function driverRow(d) {
