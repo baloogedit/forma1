@@ -21,7 +21,41 @@ export function startRouter(routeTable, defaultRoute) {
   fallback = defaultRoute;
   window.addEventListener('hashchange', () => handle());
   listenForRefreshes();
+  trackScroll();
   handle();
+}
+
+// Back/Forward should land where the user left a page. Every history entry gets
+// an id in history.state, and its scroll position is remembered under that id.
+// A link click creates a fresh entry with no id yet, so it starts at the top.
+const scrollPositions = new Map();
+let currentEntry = null;
+let nextEntryId = Date.now();
+
+function trackScroll() {
+  history.scrollRestoration = 'manual'; // the browser would restore too early
+  let queued = false;
+  window.addEventListener('scroll', () => {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(() => {
+      queued = false;
+      if (currentEntry) scrollPositions.set(currentEntry, window.scrollY);
+    });
+  }, { passive: true });
+}
+
+// Marks the current history entry as active and returns the scroll position
+// to restore, or null for a page visited for the first time.
+function enterHistoryEntry() {
+  const id = history.state?.entry;
+  if (id) {
+    currentEntry = id;
+    return scrollPositions.get(id) ?? null;
+  }
+  currentEntry = ++nextEntryId;
+  history.replaceState({ ...history.state, entry: currentEntry }, '');
+  return null;
 }
 
 // Pages render from saved data first; when a background refresh brings in new
@@ -58,7 +92,9 @@ async function handle({ silent = false, rerender = true } = {}) {
 
   const token = ++renderToken;
   const el = root();
+  let restoreY = null;
   if (!silent) {
+    restoreY = enterHistoryEntry();
     if (cleanup) cleanup();
     cleanup = null;
     updateNav(view.nav ?? name); // sub-pages can highlight their parent section
@@ -76,7 +112,10 @@ async function handle({ silent = false, rerender = true } = {}) {
       cleanup = view.render(el, data, params) ?? null;
       setTitle(typeof view.title === 'function' ? view.title(data, params) : view.title);
       if (silent) window.scrollTo(0, scrollY);
-      else announcePage(el);
+      else {
+        if (restoreY !== null) window.scrollTo(0, restoreY);
+        announcePage(el);
+      }
     }
     setDataTime(getDataAge());
   } catch (err) {

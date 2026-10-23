@@ -37,7 +37,7 @@ export function render(root, races, [openRound]) {
       const open = !entry.classList.contains('open');
       setOpen(entry, open);
       // keep the URL shareable without triggering a re-render
-      history.replaceState(null, '', open ? `#/results/${entry.dataset.round}` : '#/results');
+      history.replaceState(history.state, '', open ? `#/results/${entry.dataset.round}` : '#/results');
     });
   });
 
