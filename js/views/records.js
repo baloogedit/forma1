@@ -1,16 +1,10 @@
-import { getSchedule, getChampions } from '../api.js';
-import { esc, driverName, seasonStatus, pageHead } from '../utils.js';
+import { getChampions } from '../api.js';
+import { esc, driverName, pageHead } from '../utils.js';
 
 export const title = 'Records';
 
 export async function load() {
-  const schedule = await getSchedule();
-
-  // the current season's leader isn't a champion until the season is over
-  const season = Number(schedule[0]?.season ?? new Date().getFullYear());
-  const lastFinished = seasonStatus(schedule).next ? season - 1 : season;
-
-  return getChampions(lastFinished);
+  return getChampions();
 }
 
 export function render(root, { drivers, constructors }) {

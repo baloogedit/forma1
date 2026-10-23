@@ -6,9 +6,11 @@ import * as results from './views/results.js';
 import * as standings from './views/standings.js';
 import * as records from './views/records.js';
 import * as weekend from './views/weekend.js';
+import * as driver from './views/driver.js';
+import * as team from './views/team.js';
 
 startStatus();
-startRouter({ pitwall, calendar, results, standings, records, weekend }, 'pitwall');
+startRouter({ pitwall, calendar, results, standings, records, weekend, driver, team }, 'pitwall');
 
 // Light/dark toggle. Without a saved choice the system setting decides.
 const THEME_KEY = 'pitlane:theme';

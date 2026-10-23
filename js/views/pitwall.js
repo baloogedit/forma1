@@ -1,6 +1,6 @@
 import { getSchedule, getDriverStandings, getConstructorStandings } from '../api.js';
 import {
-  esc, raceStart, location, driverName, seasonStatus, countdownParts, pad, bar, pageHead,
+  esc, raceStart, location, driverLink, teamLink, seasonStatus, countdownParts, pad, bar, pageHead,
   weekendSessions, sessionState, isSprintWeekend, dayLabel, timeLabel,
 } from '../utils.js';
 
@@ -45,7 +45,7 @@ export function render(root, { schedule, drivers, constructors }) {
           ${constructors.slice(0, 5).map((c) => `
             <li>
               <span class="pos">${esc(c.position ?? c.positionText)}</span>
-              <span>${esc(c.Constructor.name)}</span>
+              <span>${teamLink(c.Constructor)}</span>
               <span class="pts">${esc(c.points)}</span>
             </li>`).join('')}
         </ul>
@@ -117,7 +117,7 @@ function driversTop5(drivers) {
       ${drivers.slice(0, 5).map((d) => `
         <li>
           <span class="pos">${esc(d.position ?? d.positionText)}</span>
-          <span>${esc(driverName(d.Driver))}</span>
+          <span>${driverLink(d.Driver)}</span>
           ${bar((Number(d.points) / max) * 100)}
           <span class="pts">${esc(d.points)}</span>
         </li>`).join('')}

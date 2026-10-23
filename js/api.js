@@ -1,4 +1,6 @@
 // Jolpica-F1 API (Ergast-compatible) with a localStorage cache.
+import { seasonStatus } from './utils.js';
+
 const BASE = 'https://api.jolpi.ca/ergast/f1';
 const PAGE_SIZE = 100; // the API caps `limit` at 100
 const HOUR = 60 * 60 * 1000;
@@ -28,8 +30,24 @@ export function resetDataAge() { oldest = null; }
 export const getDataAge = () => oldest;
 const noteAge = (time) => { oldest = Math.min(oldest ?? time, time); };
 
-async function fetchData(url) {
+// Jolpica allows about 4 requests a second. Space requests out so pages that
+// need several at once (like a driver profile) don't get rate-limited.
+const SPACING = 350;
+const MAX_RETRIES = 3;
+let nextSlot = 0;
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function fetchData(url, attempt = 0) {
+  const now = Date.now();
+  const wait = Math.max(0, nextSlot - now);
+  nextSlot = now + wait + SPACING;
+  if (wait) await sleep(wait);
+
   const res = await fetch(url);
+  if (res.status === 429 && attempt < MAX_RETRIES) {
+    await sleep(1000 * 2 ** attempt); // rate-limited anyway: back off 1 s, 2 s, 4 s
+    return fetchData(url, attempt + 1);
+  }
   if (!res.ok) throw new Error(`API error ${res.status}`);
   return (await res.json()).MRData;
 }
@@ -123,9 +141,59 @@ export async function getSessionResults(season, round, type) {
   return data.RaceTable.Races[0]?.[key] ?? [];
 }
 
+// Career totals change at most once a race weekend, so they're kept for a day.
+// Asking for one row is enough: the answer's `total` is the count.
+const DAY = 24 * HOUR;
+const count = async (path) => Number((await get(path, { limit: 1 }, DAY)).total);
+
+export async function getDriverProfile(id) {
+  // check the driver exists first, so a bad link costs one request, not eight
+  const driver = (await get(`/drivers/${id}`, {}, DAY)).DriverTable.Drivers[0];
+  if (!driver) return { driver: null };
+
+  const [seasons, starts, wins, seconds, thirds, poles, season] = await Promise.all([
+    count(`/drivers/${id}/seasons`),
+    count(`/drivers/${id}/results`),
+    count(`/drivers/${id}/results/1`),
+    count(`/drivers/${id}/results/2`),
+    count(`/drivers/${id}/results/3`),
+    count(`/drivers/${id}/qualifying/1`),
+    get(`/current/drivers/${id}/results`, { limit: PAGE_SIZE }),
+  ]);
+  return {
+    driver,
+    career: { seasons, starts, wins, podiums: wins + seconds + thirds, poles },
+    races: season.RaceTable.Races, // this season, one result per race
+  };
+}
+
+export async function getTeamProfile(id) {
+  const team = (await get(`/constructors/${id}`, {}, DAY)).ConstructorTable.Constructors[0];
+  if (!team) return { team: null };
+
+  const [seasons, wins, seconds, thirds, poles, season] = await Promise.all([
+    count(`/constructors/${id}/seasons`),
+    count(`/constructors/${id}/results/1`),
+    count(`/constructors/${id}/results/2`),
+    count(`/constructors/${id}/results/3`),
+    count(`/constructors/${id}/qualifying/1`),
+    get(`/current/constructors/${id}/results`, { limit: PAGE_SIZE }),
+  ]);
+  return {
+    team,
+    career: { seasons, wins, podiums: wins + seconds + thirds, poles },
+    races: season.RaceTable.Races, // this season, both cars per race
+  };
+}
+
 // The API only serves standings per season, so past champions ship as a snapshot
 // (data/champions.json) and any season finished after it is fetched live.
-export async function getChampions(lastFinishedSeason) {
+// The current season's leader isn't a champion until the season is over.
+export async function getChampions() {
+  const schedule = await getSchedule();
+  const season = Number(schedule[0]?.season ?? new Date().getFullYear());
+  const lastFinishedSeason = seasonStatus(schedule).next ? season - 1 : season;
+
   const res = await fetch('data/champions.json');
   if (!res.ok) throw new Error('Missing champions snapshot');
   const snapshot = await res.json();

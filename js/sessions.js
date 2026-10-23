@@ -1,7 +1,7 @@
 // Tabbed results (Sprint / Qualifying / Race) for one weekend, shared by the
 // weekend page and the Results accordion. Each session is fetched on first view.
 import { getSessionResults } from './api.js';
-import { esc, driverName, weekendSessions, sessionState } from './utils.js';
+import { esc, driverLink, teamLink, weekendSessions, sessionState } from './utils.js';
 import { setupTabs } from './tabs.js';
 import { tableSkeleton } from './skeleton.js';
 
@@ -64,8 +64,8 @@ function podium(top3) {
       ${top3.map((r) => `
         <div>
           <span class="p">P${esc(r.position)}</span>
-          <strong>${esc(driverName(r.Driver))}</strong>
-          <small>${esc(r.Constructor.name)}</small>
+          <strong>${driverLink(r.Driver)}</strong>
+          <small>${teamLink(r.Constructor)}</small>
         </div>`).join('')}
     </div>`;
 }
@@ -87,8 +87,8 @@ function raceTable(results, caption) {
           ${results.map((r) => `
             <tr>
               <td class="num">${esc(r.positionText)}</td>
-              <td>${esc(driverName(r.Driver))}${r.FastestLap?.rank === '1' ? '<span class="fl" title="Fastest lap">FL</span>' : ''}</td>
-              <td class="muted">${esc(r.Constructor.name)}</td>
+              <td>${driverLink(r.Driver)}${r.FastestLap?.rank === '1' ? '<span class="fl" title="Fastest lap">FL</span>' : ''}</td>
+              <td class="muted">${teamLink(r.Constructor)}</td>
               <td class="muted">${r.grid === '0' ? 'PL' : esc(r.grid)}</td>
               <td class="muted">${esc(r.laps)}</td>
               <td>${esc(r.Time?.time ?? r.status)}</td>
@@ -111,8 +111,8 @@ function qualifyingTable(results, caption) {
           ${results.map((r) => `
             <tr>
               <td class="num">${esc(r.position)}</td>
-              <td>${esc(driverName(r.Driver))}${r.position === '1' ? '<span class="fl" title="Pole position">POLE</span>' : ''}</td>
-              <td class="muted">${esc(r.Constructor.name)}</td>
+              <td>${driverLink(r.Driver)}${r.position === '1' ? '<span class="fl" title="Pole position">POLE</span>' : ''}</td>
+              <td class="muted">${teamLink(r.Constructor)}</td>
               <td class="muted">${esc(r.Q1 ?? '—')}</td>
               <td class="muted">${esc(r.Q2 ?? '—')}</td>
               <td>${esc(r.Q3 ?? '—')}</td>

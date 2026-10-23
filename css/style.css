@@ -552,6 +552,12 @@ table.results {
 }
 .stat-card .who { font-weight: 600; }
 .stat-card .sub { color: var(--muted); font-size: 0.9rem; }
+.detail-stats { margin-top: 24px; }
+
+/* names linking to driver / team pages: plain until hovered or focused */
+.inline-link { text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 3px; }
+.inline-link:hover { color: var(--accent-text); text-decoration-color: currentColor; }
+.page-sub .inline-link { text-decoration-color: currentColor; }
 
 .records-grid {
   display: grid;

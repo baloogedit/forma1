@@ -86,6 +86,15 @@ export function driverName(driver) {
   return `${driver.givenName} ${driver.familyName}`;
 }
 
+// Names that open the driver / team detail page.
+export function driverLink(driver) {
+  return `<a class="inline-link" href="#/driver/${esc(driver.driverId)}">${esc(driverName(driver))}</a>`;
+}
+
+export function teamLink(constructor) {
+  return `<a class="inline-link" href="#/team/${esc(constructor.constructorId)}">${esc(constructor.name)}</a>`;
+}
+
 // Splits the schedule into finished races and the next one.
 export function seasonStatus(schedule, now = new Date()) {
   const next = schedule.find((race) => raceStart(race) > now) ?? null;
