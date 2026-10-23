@@ -132,6 +132,7 @@ function championsTable(drivers, constructors) {
   const teamBySeason = new Map(constructors.map((s) => [s.season, s.ConstructorStandings[0].Constructor.name]));
   return `
     <table class="results">
+      <caption class="sr-only">World champions by season</caption>
       <thead>
         <tr><th>Season</th><th>Driver</th><th>Driver's team</th><th>Constructors' champion</th></tr>
       </thead>

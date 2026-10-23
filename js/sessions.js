@@ -5,6 +5,7 @@ import { esc, driverName, weekendSessions, sessionState } from './utils.js';
 import { setupTabs } from './tabs.js';
 
 const LABELS = { sprint: 'Sprint', qualifying: 'Qualifying', race: 'Race' };
+const CAPTIONS = { sprint: 'sprint classification', qualifying: 'qualifying results', race: 'race classification' };
 
 // race: a schedule entry. preloaded: rows already fetched, e.g. { race: [...] }.
 // Returns { show(type) } so other controls can switch tabs, or null if nothing has run yet.
@@ -46,7 +47,8 @@ export function mountSessionResults(container, race, { preloaded = {}, initial }
       body.innerHTML = '<p class="empty">Results haven\'t been published yet.</p>';
       delete cache[type]; // try again next time
     } else {
-      body.innerHTML = type === 'qualifying' ? qualifyingTable(rows) : raceTable(rows);
+      const caption = `${race.raceName} – ${CAPTIONS[type]}`;
+      body.innerHTML = type === 'qualifying' ? qualifyingTable(rows, caption) : raceTable(rows, caption);
     }
   }
 
@@ -68,11 +70,12 @@ function podium(top3) {
 }
 
 // Race and sprint share the same classification format.
-function raceTable(results) {
+function raceTable(results, caption) {
   return `
     ${podium(results.slice(0, 3))}
     <div class="table-scroll">
       <table class="results">
+        <caption class="sr-only">${esc(caption)}</caption>
         <thead>
           <tr>
             <th>Pos</th><th>Driver</th><th>Team</th><th>Grid</th><th>Laps</th>
@@ -95,10 +98,11 @@ function raceTable(results) {
     </div>`;
 }
 
-function qualifyingTable(results) {
+function qualifyingTable(results, caption) {
   return `
     <div class="table-scroll">
       <table class="results">
+        <caption class="sr-only">${esc(caption)}</caption>
         <thead>
           <tr><th>Pos</th><th>Driver</th><th>Team</th><th>Q1</th><th>Q2</th><th>Q3</th></tr>
         </thead>

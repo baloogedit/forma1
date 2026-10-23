@@ -54,13 +54,13 @@ export function render(root, races, [openRound]) {
 function item(race) {
   return `
     <article class="acc-item" data-round="${esc(race.round)}">
-      <button class="acc-head" aria-expanded="false">
-        <span class="r">R${esc(race.round)}</span>
+      <button class="acc-head" aria-expanded="false" aria-controls="round-${esc(race.round)}-panel" id="round-${esc(race.round)}-head">
+        <span class="r"><span class="sr-only">Round </span>R${esc(race.round)}</span>
         <span class="name">${esc(race.raceName)}${isSprintWeekend(race) ? '<span class="tag">Sprint</span>' : ''}</span>
         <span class="date">${esc(shortDate(race))}</span>
         <span class="toggle" aria-hidden="true">+</span>
       </button>
-      <div class="acc-body">
+      <div class="acc-body" id="round-${esc(race.round)}-panel" role="region" aria-labelledby="round-${esc(race.round)}-head">
         <div class="session-results"></div>
         <p class="weekend-link"><a class="link-arrow" href="#/weekend/${esc(race.round)}">Weekend schedule →</a></p>
       </div>
