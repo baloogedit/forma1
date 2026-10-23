@@ -1,12 +1,15 @@
 // Minimal hash router. Each view module exports:
 //   load(params)              -> Promise of data
 //   render(root, data, params) -> optional cleanup function
+//   title                     -> page title, or a function (data, params) => title
+//   nav (optional)            -> which header link to highlight
 const root = () => document.getElementById('app');
 
 let routes = {};
 let fallback = '';
 let cleanup = null;
 let renderToken = 0;
+let firstRender = true;
 
 export function startRouter(routeTable, defaultRoute) {
   routes = routeTable;
@@ -42,6 +45,8 @@ async function handle() {
     const data = await view.load(params);
     if (token !== renderToken) return; // the user navigated away meanwhile
     cleanup = view.render(el, data, params) ?? null;
+    setTitle(typeof view.title === 'function' ? view.title(data, params) : view.title);
+    announcePage(el);
   } catch (err) {
     if (token !== renderToken) return;
     console.error(err);
@@ -58,6 +63,24 @@ async function handle() {
 
 function updateNav(name) {
   document.querySelectorAll('#nav a').forEach((a) => {
-    a.classList.toggle('active', a.dataset.route === name);
+    const active = a.dataset.route === name;
+    a.classList.toggle('active', active);
+    if (active) a.setAttribute('aria-current', 'page');
+    else a.removeAttribute('aria-current');
   });
+}
+
+function setTitle(title) {
+  document.title = title ? `${title} – PIT/LANE` : 'PIT/LANE – Formula 1';
+}
+
+// After an in-app navigation, move focus to the new content like a real page
+// load would, so keyboard and screen-reader users start at the top of it.
+// The first load is left alone: the browser already starts at the top.
+function announcePage(el) {
+  if (firstRender) {
+    firstRender = false;
+    return;
+  }
+  el.focus({ preventScroll: true });
 }

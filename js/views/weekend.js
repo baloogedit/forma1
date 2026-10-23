@@ -6,6 +6,7 @@ import {
 import { mountSessionResults } from '../sessions.js';
 
 export const nav = 'calendar'; // highlight Calendar in the header
+export const title = (race) => race?.raceName ?? 'Race weekend';
 
 export async function load([round]) {
   const schedule = await getSchedule();

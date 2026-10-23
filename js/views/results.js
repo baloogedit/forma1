@@ -2,6 +2,8 @@ import { getSchedule, getSeasonResults } from '../api.js';
 import { esc, shortDate, isSprintWeekend, pageHead } from '../utils.js';
 import { mountSessionResults } from '../sessions.js';
 
+export const title = 'Results';
+
 export async function load() {
   const [schedule, races] = await Promise.all([getSchedule(), getSeasonResults()]);
   // the schedule entry knows the weekend's sessions; the race rows are already loaded

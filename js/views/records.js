@@ -1,6 +1,8 @@
 import { getSchedule, getChampions } from '../api.js';
 import { esc, driverName, seasonStatus, pageHead } from '../utils.js';
 
+export const title = 'Records';
+
 export async function load() {
   const schedule = await getSchedule();
 

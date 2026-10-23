@@ -3,6 +3,8 @@ import { esc, driverName, bar, pageHead } from '../utils.js';
 
 let activeTab = 'drivers'; // remembered while the app is open
 
+export const title = 'Standings';
+
 export async function load() {
   const [drivers, constructors] = await Promise.all([getDriverStandings(), getConstructorStandings()]);
   return { drivers, constructors };
